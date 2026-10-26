@@ -1,6 +1,6 @@
 # Polars vs. Pandas: Efektywna ekstrakcja i przetwarzanie danych OpenAlex z wykorzystaniem logiki SQL
 
-Repozytorium na spotkanie naukowe poświęcone nowoczesnym narzędziom inżynierii danych. Głównym bohaterem warsztatów jest biblioteka Polars – wydajna alternatywa dla Pandas, łącząca szybkość języka Rust z intuicyjną logiką zapytań SQL.
+Repozytorium na spotkanie kołą naukowego PG (26.10.2026) poświęcone nowoczesnym narzędziom inżynierii danych. Głównym bohaterem warsztatów jest biblioteka Polars – wydajna alternatywa dla Pandas, łącząca szybkość języka Rust z intuicyjną logiką zapytań SQL.
 
 Proces ekstrakcji danych jest na podstawie datasetu OpenAlex. Na przykładach różnych typów danych (od identyfikatorów numerycznych po złożone operacje na stringach) przeanalizujemy różnice w składni, optymalizacji zapytań oraz wydajności pomiędzy Pandas, Polars i czystym SQL.
 
