@@ -1,0 +1,40 @@
+# ---------------------------------------------------------------------------
+# Konfiguracja warsztatu - JEDYNE miejsce, w ktorym zmieniamy temat kwerendy.
+# Skrypty pobierajacy i analityczne czytaja ten plik (nie hardkoduja tematow).
+# ---------------------------------------------------------------------------
+
+# Temat badawczy (opisowy, trafia do raportu i prezentacji)
+research_topic: >-
+  Ekonometryczna walidacja modelu wspomagania decyzji zarzadczych
+
+# Slowa kluczowe - rdzen kwerendy (czesc A zapytania: OR)
+keywords:
+  - optimization
+  - net benefit
+  - efficiency
+
+# Terminy kontekstowe - zawężaja obszar zastosowania (czesc B zapytania: OR)
+# Zapytanie koncowe: (KEYWORDS) AND (TOPIC_CONTEXT_TERMS)
+topic_context_terms:
+  - Human resources
+  - financials
+  - management
+  - customer
+
+# Parametry pobierania danych z OpenAlex
+query:
+  per_page: 200        # maks. 200 (limit API)
+  max_records: 12000   # docelowa liczba rekordow (paginacja kursorowa)
+  mail_to: "research@example.edu"   # kontakt wymagany przez OpenAlex (polite pool)
+
+  # Pole, po ktorym szukamy. Dostepne:
+  #   title_and_abstract -> tytul + abstrakt (domyslne, najbardziej trafne)
+  #   title              -> tylko tytul (najwezsze)
+  #   default            -> pelny tekst (najszersze, setki milionow trafien)
+  search_field: title_and_abstract
+
+  # Dodatkowe filtry OpenAlex (polaczone operatorem AND).
+  # Uwaga: bez nich sama kwerenda slow kluczowych zwraca ponad 800 tys. prac.
+  extra_filters:
+    - "type:article"
+    - "has_abstract:true"
