@@ -2,7 +2,7 @@
 """
 KROK 2a - Analiza danych w POLARS.
 
-Ten sam zestaw 11 pytan (Q1-Q11) realizujemy tutaj w Polars, a nastepnie -
+Ten sam zestaw 12 pytan (Q1-Q12) realizujemy tutaj w Polars, a nastepnie -
 identycznie - w Pandas (03) i w SQL (04). Celem jest porownanie SKLADNI,
 a nie wydajnosci. Q10-Q11 to zaawansowana operacja na stringach: rozbicie
 kolumny 'keywords' na pojedyncze slowa kluczowe i ich zliczenie.
@@ -171,6 +171,14 @@ print("Q11. Top 10 slow kluczowych:")
 print(q11)
 for row in q11.iter_rows(named=True):
     dodaj("Q11", "Top 10 najczestszych slow kluczowych", row["keyword"], row["len"], "int")
+
+# %% Q12 - wybor wierszy: pozycje 11-20 w kolejnosci pliku (bez sortowania)
+# Odpowiednik .slice(offset, length): "pomin 10 wierszy, wez kolejne 10".
+q12 = df.select("title", "cited_by_count").slice(10, 10)
+print("Q12. Wiersze 11-20:")
+print(q12)
+for ranking, row in enumerate(q12.iter_rows(named=True), start=11):
+    dodaj("Q12", "Wiersze 11-20 w kolejnosci pliku", f"{ranking}. {row['title']}", row["cited_by_count"], "int")
 
 # %% Zapis wynikow (STOP POMIARU CZASU)
 elapsed = time.perf_counter() - start

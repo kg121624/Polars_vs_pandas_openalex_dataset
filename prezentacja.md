@@ -46,9 +46,9 @@ style: |
 | # | Etap | Czas | Efekt |
 |---|------|------|-------|
 | 1 | Konfiguracja tematu (YAML) + kwerenda OpenAlex | 15 min | `data/works_topic_*.csv` |
-| 2 | Analiza w **Polars** (Q1–Q11) | 20 min | `reports/wyniki_polars_*.xlsx` |
-| 3 | Analiza w **Pandas** (te same Q1–Q11) | 20 min | `reports/wyniki_pandas_*.xlsx` |
-| 4 | Analiza w **SQL / pandasql** (te same Q1–Q11) | 20 min | `reports/wyniki_sql_*.xlsx` |
+| 2 | Analiza w **Polars** (Q1–Q12) | 20 min | `reports/wyniki_polars_*.xlsx` |
+| 3 | Analiza w **Pandas** (te same Q1–Q12) | 20 min | `reports/wyniki_pandas_*.xlsx` |
+| 4 | Analiza w **SQL / pandasql** (te same Q1–Q12) | 20 min | `reports/wyniki_sql_*.xlsx` |
 | 5 | Porównanie wyników + wykresy | 15 min | `reports/porownanie_*.xlsx` |
 | 6 | Dyskusja: składnia, typy, pułapki NULL | 10 min | wnioski |
 
@@ -71,7 +71,7 @@ Cel nie jest „która biblioteka jest szybsza”, ale **pokazanie różnic w sk
 **Trzy kroki:**
 
 1. **Ekstrakcja** — kwerenda do OpenAlex na podstawie konfiguracji YAML → CSV.
-2. **Analiza** — 11 identycznych pytań (Q1–Q11) wykonanych osobno w Polars, Pandas i SQL.
+2. **Analiza** — 12 identycznych pytań (Q1–Q12) wykonanych osobno w Polars, Pandas i SQL.
 3. **Porównanie** — czy wyniki są zgodne? które zapisy są najkrótsze? gdzie są pułapki?
 
 <div class="note">
@@ -158,9 +158,9 @@ Polars_vs_pandas_openalex_dataset/
 ├── scripts/
 │   ├── common.py               # YAML, .env, ścieżki, zapis wyników
 │   ├── 01_fetch_openalex.py    # API → data/works_topic_*.csv
-│   ├── 02_analysis_polars.py   # Q1–Q11 w Polars
-│   ├── 03_analysis_pandas.py   # Q1–Q11 w Pandas
-│   ├── 04_analysis_sql.py      # Q1–Q11 w SQL (pandasql)
+│   ├── 02_analysis_polars.py   # Q1–Q12 w Polars
+│   ├── 03_analysis_pandas.py   # Q1–Q12 w Pandas
+│   ├── 04_analysis_sql.py      # Q1–Q12 w SQL (pandasql)
 │   └── 05_compare_results.py   # zgodność + wykresy
 ├── data/                       # dataset CSV (timestamp w nazwie)
 ├── reports/                    # XLSX + CSV + Markdown + figures/ (PNG, SVG)
@@ -178,7 +178,7 @@ Każdy skrypt używa znaczników `# %%` — uruchamiasz komórka po komórce w P
 
 <!-- _class: dense -->
 
-## Krok 2 — jedenaście pytań analitycznych (Q1–Q11)
+## Krok 2 — dwanaście pytań analitycznych (Q1–Q12)
 
 | id | Pytanie | Typ danych | Operacja |
 |----|---------|-----------|----------|
@@ -193,10 +193,11 @@ Każdy skrypt używa znaczników `# %%` — uruchamiasz komórka po komórce w P
 | Q9 | Top 5 czasopism | str | grupowanie + sort + limit |
 | Q10 | Liczba unikalnych słów kluczowych | int | **split → explode → distinct** |
 | Q11 | Top 10 najczęstszych słów kluczowych | str/int | **split → explode → grupowanie** |
+| Q12 | Wiersze 11–20 (kolejność pliku) | str/int | **wybór wierszy (slice / offset)** |
 
 <div class="note">
 
-Świadomie mieszamy **int / float / str**, żeby zobaczyć różnice w typowaniu, sortowaniu i obsłudze wartości pustych. Q10–Q11 to zaawansowana praca na stringach.
+Świadomie mieszamy **int / float / str**, żeby zobaczyć różnice w typowaniu, sortowaniu i obsłudze wartości pustych. Q10–Q11 to zaawansowana praca na stringach, Q12 to wybór wierszy po pozycji.
 
 </div>
 
@@ -295,9 +296,65 @@ Ten sam efekt, bardzo różny koszt. Polars i Pandas mają `explode` w jednej li
 
 <!-- _class: dense -->
 
+## Składnia — wybór 10 wierszy od pozycji 11 (Q12)
+
+Bez sortowania — bierzemy wiersze **11.–20.** w kolejności pliku (pomijamy 10 pierwszych):
+
+<div class="columns-3">
+
+<div>
+
+**Polars**
+
+```python
+df.select(
+    "title", "cited_by_count"
+  ).slice(10, 10)
+# slice(offset, length)
+```
+
+</div>
+
+<div>
+
+**Pandas**
+
+```python
+df.iloc[10:20][
+    ["title", "cited_by_count"]]
+# iloc[start:stop] - stop wykluczony
+```
+
+</div>
+
+<div>
+
+**SQL**
+
+```sql
+SELECT title, cited_by_count
+FROM df
+LIMIT 10 OFFSET 10
+-- pomin 10, wez 10
+```
+
+</div>
+
+</div>
+
+<div class="note">
+
+Polars używa pary **offset + długość** (`slice(10, 10)`), Pandas i Python — **wycinka** `[start:stop]` (koniec wykluczony), a SQL **`LIMIT` + `OFFSET`**. Uwaga: bez `ORDER BY` kolejność jest zależna od silnika — SQLite zwraca wiersze w kolejności wstawiania.
+
+</div>
+
+---
+
+<!-- _class: dense -->
+
 ## Krok 3 — porównanie: zgodność wyników
 
-Wszystkie 105 wierszy wyników (Q1–Q11) porównane po `(id, szczegol)`:
+Wszystkie 115 wierszy wyników (Q1–Q12) porównane po `(id, szczegol)`:
 
 | id | Pytanie | Wierszy | Różnych |
 |----|---------|--------:|--------:|
@@ -312,8 +369,9 @@ Wszystkie 105 wierszy wyników (Q1–Q11) porównane po `(id, szczegol)`:
 | Q9 | Top 5 czasopism | 5 | **0** |
 | Q10 | Unikalne słowa kluczowe | 1 | **0** |
 | Q11 | Top 10 słów kluczowych | 10 | **0** |
+| Q12 | Wiersze 11–20 | 10 | **0** |
 
-<p class="ok">Wynik: 105 / 105 zgodnych — 0 rozbieżności.</p>
+<p class="ok">Wynik: 115 / 115 zgodnych — 0 rozbieżności.</p>
 
 ---
 
@@ -517,10 +575,12 @@ SELECT AVG(LENGTH(title)) AS n FROM df
 | Q10 | unikalne słowa kluczowe | 30818 | 30818 | 30818 |
 | Q11 | human resource management | 731 | 731 | 731 |
 | Q11 | customer satisfaction | 667 | 667 | 667 |
+| Q12 | 11. Human Resources Management… | 0 | 0 | 0 |
+| Q12 | 12. The Role of Information… | 7 | 7 | 7 |
 
 <div class="note">
 
-Typy `int` (zliczenia), `float` (średnie) i `str` (nazwy czasopism/języków, słowa kluczowe) dają identyczne rezultaty w każdej z metod.
+Typy `int` (zliczenia), `float` (średnie) i `str` (nazwy czasopism/języków, słowa kluczowe) dają identyczne rezultaty w każdej z metod. Q12 pokazuje, że **ten sam wiersz** o tej samej pozycji trafia do wyniku we wszystkich trzech językach.
 
 </div>
 
@@ -532,15 +592,15 @@ Typy `int` (zliczenia), `float` (średnie) i `str` (nazwy czasopism/języków, s
 
 | Metoda | Czas [s] | Udział |
 |--------|---------:|-------:|
-| **Polars** | 0.1424 | 8.5% |
-| **Pandas** | 0.2120 | 12.7% |
-| **SQL (pandasql)** | 1.3213 | 78.9% |
+| **Polars** | 0.1551 | 8.6% |
+| **Pandas** | 0.2191 | 12.1% |
+| **SQL (pandasql)** | 1.4354 | 79.3% |
 
 ![w:680](reports/figures/czas_wykonania.png)
 
 <div class="note">
 
-Przy ~12 tys. rekordów różnice są widoczne: Pandas ok. **1,5×**, a pandasql ok. **9,3×** wolniejsze od Polars. Część kosztu SQL to „podatek” za tłumaczenie SQL → SQLite oraz ręczne rozbijanie stringów w Q10/Q11.
+Przy ~12 tys. rekordów różnice są widoczne: Pandas ok. **1,4×**, a pandasql ok. **9,3×** wolniejsze od Polars. Część kosztu SQL to „podatek” za tłumaczenie SQL → SQLite oraz ręczne rozbijanie stringów w Q10/Q11.
 
 </div>
 
@@ -550,12 +610,13 @@ Przy ~12 tys. rekordów różnice są widoczne: Pandas ok. **1,5×**, a pandasql
 
 ## Wnioski
 
-1. **Poprawność.** Trzy języki → jeden wynik (105/105 zgodnych). Składnia się różni, logika nie.
+1. **Poprawność.** Trzy języki → jeden wynik (115/115 zgodnych). Składnia się różni, logika nie.
 2. **Typy danych.** Polars pozwala narzucić schemat (`schema_overrides`); Pandas inferuje i często wstawia `float64` tam, gdzie spodziewamy się `int`.
 3. **Puste wartości — główne źródło rozbieżności.** Polars grupuje `NULL`, Pandas domyślnie je pomija, SQL ma osobną grupę `NULL`. Dlatego jawnie filtrujemy braki.
 4. **Remisy.** Bez sortowania pomocniczego kolejność `top-N` bywa różna między metodami — zawsze dodawaj drugi klucz sortowania.
 5. **Stringi (Q10/Q11).** Rozbicie tekstu na słowa to jedna linia w Polars/Pandas (`str.split` + `explode`), ale w SQLite wymaga rekurencyjnego `CTE` — tu SQL traci przewagę prostoty.
-6. **Czytelność.** SQL bywa najkrótszy dla agregacji; Polars jest zwięzły i typowany; Pandas najbardziej „rozproszony” składniowo.
+6. **Wybór wierszy (Q12).** Polars to `slice(offset, length)`, Pandas `iloc[start:stop]`, SQL `LIMIT` + `OFFSET`. Bez `ORDER BY` kolejność jest zależna od silnika.
+7. **Czytelność.** SQL bywa najkrótszy dla agregacji; Polars jest zwięzły i typowany; Pandas najbardziej „rozproszony” składniowo.
 
 ---
 
@@ -576,6 +637,7 @@ Przy ~12 tys. rekordów różnice są widoczne: Pandas ok. **1,5×**, a pandasql
 | Rozbicie tekstu | `col.str.split("; ")` | `df["c"].str.split("; ")` | `SPLIT` (brak w SQLite) |
 | Rozwinięcie listy | `.explode("keyword")` | `.explode("keyword")` | rekurencyjny `WITH RECURSIVE` |
 | Przycięcie spacji | `col.str.strip_chars()` | `df["c"].str.strip()` | `TRIM(c)` |
+| Wybór wierszy | `.slice(10, 10)` | `.iloc[10:20]` | `LIMIT 10 OFFSET 10` |
 | Braki | `drop_nulls()` | `dropna()` | `WHERE c IS NOT NULL` |
 
 ---
@@ -585,10 +647,11 @@ Przy ~12 tys. rekordów różnice są widoczne: Pandas ok. **1,5×**, a pandasql
 # Ćwiczenia dla studentów
 
 1. Zmień `keywords` w `config/topic.yaml` i ponownie uruchom cały potok.
-2. Dodaj **Q12**: „średnia liczba autorów na pracę” (`n_authors`) w trzech metodach.
+2. Dodaj **Q13**: „średnia liczba autorów na pracę” (`n_authors`) w trzech metodach.
 3. Rozszerz Q11: znajdź słowa kluczowe występujące tylko w pracach z jednego kraju (`country`).
-4. Dodaj filtr `publication_year:>2015` i sprawdź, czy wyniki nadal się zgadzają.
-5. Zwiększ `max_records` do 30 000 i porównaj czasy wykonania.
+4. Powtórz Q12 z `ORDER BY title` — czy wyniki nadal są zgodne między metodami?
+5. Dodaj filtr `publication_year:>2015` i sprawdź, czy wyniki nadal się zgadzają.
+6. Zwiększ `max_records` do 30 000 i porównaj czasy wykonania.
 
 <div class="note">
 

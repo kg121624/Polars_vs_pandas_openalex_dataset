@@ -2,7 +2,7 @@
 """
 KROK 2b - Analiza danych w PANDAS.
 
-Ten sam zestaw 11 pytan (Q1-Q11) co w Polars (02) i SQL (04).
+Ten sam zestaw 12 pytan (Q1-Q12) co w Polars (02) i SQL (04).
 Porownaj skladnie obu bibliotek linia po linii.
 Q10-Q11 to zaawansowana operacja na stringach (str.split + explode).
 """
@@ -161,6 +161,14 @@ print("Q11. Top 10 slow kluczowych:")
 print(q11.to_string(index=False))
 for row in q11.itertuples(index=False):
     dodaj("Q11", "Top 10 najczestszych slow kluczowych", row.keyword, row.n, "int")
+
+# %% Q12 - wybor wierszy: pozycje 11-20 w kolejnosci pliku (bez sortowania)
+# Odpowiednik .iloc[start:stop]: wiersze o pozycji 10..19 (0-based) = 11..20 (1-based).
+q12 = df.iloc[10:20][["title", "cited_by_count"]]
+print("Q12. Wiersze 11-20:")
+print(q12.to_string(index=False))
+for ranking, row in enumerate(q12.itertuples(index=False), start=11):
+    dodaj("Q12", "Wiersze 11-20 w kolejnosci pliku", f"{ranking}. {row.title}", row.cited_by_count, "int")
 
 # %% Zapis wynikow (STOP POMIARU CZASU)
 elapsed = time.perf_counter() - start

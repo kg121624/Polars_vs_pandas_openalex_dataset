@@ -2,7 +2,7 @@
 """
 KROK 2c - Analiza danych w SQL (silnik SQLite przez biblioteke pandasql).
 
-Ten sam zestaw 11 pytan (Q1-Q11) co w Polars (02) i Pandas (03).
+Ten sam zestaw 12 pytan (Q1-Q12) co w Polars (02) i Pandas (03).
 Zapytania SQL dzialaja na ramce pandas (df) udostepnianej jako tabela "df".
 Q10-Q11 to zaawansowana operacja na stringach - rozbicie 'keywords'
 rekurencyjnym CTE (SQLite nie ma funkcji SPLIT).
@@ -195,6 +195,22 @@ print("Q11. Top 10 slow kluczowych:")
 print(q11.to_string(index=False))
 for row in q11.itertuples(index=False):
     dodaj("Q11", "Top 10 najczestszych slow kluczowych", row.keyword, row.n, "int")
+
+# %% Q12 - wybor wierszy: pozycje 11-20 w kolejnosci pliku (bez sortowania)
+# Odpowiednik LIMIT/OFFSET: "pomin 10 wierszy, wez kolejne 10".
+# Uwaga: bez ORDER BY kolejnosc jest zalezna od silnika - SQLite dla prostego
+# skanu zwraca wiersze w kolejnosci wstawiania (czyli tak jak w pliku CSV).
+q12 = sql(
+    """
+    SELECT title, cited_by_count
+    FROM df
+    LIMIT 10 OFFSET 10
+    """
+)
+print("Q12. Wiersze 11-20:")
+print(q12.to_string(index=False))
+for ranking, row in enumerate(q12.itertuples(index=False), start=11):
+    dodaj("Q12", "Wiersze 11-20 w kolejnosci pliku", f"{ranking}. {row.title}", row.cited_by_count, "int")
 
 # %% Zapis wynikow (STOP POMIARU CZASU)
 elapsed = time.perf_counter() - start

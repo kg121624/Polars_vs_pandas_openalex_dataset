@@ -109,9 +109,9 @@ Polars_vs_pandas_openalex_dataset/
 ├── scripts/
 │   ├── common.py               # YAML, .env, ścieżki, zapis wyników
 │   ├── 01_fetch_openalex.py    # API OpenAlex -> data/works_topic_*.csv
-│   ├── 02_analysis_polars.py   # Q1-Q11 w Polars
-│   ├── 03_analysis_pandas.py   # Q1-Q11 w Pandas
-│   ├── 04_analysis_sql.py      # Q1-Q11 w SQL (pandasql)
+│   ├── 02_analysis_polars.py   # Q1-Q12 w Polars
+│   ├── 03_analysis_pandas.py   # Q1-Q12 w Pandas
+│   ├── 04_analysis_sql.py      # Q1-Q12 w SQL (pandasql)
 │   └── 05_compare_results.py   # zgodność wyników + wykresy
 ├── data/                       # dataset CSV (nazwa z timestampem)
 ├── reports/                    # XLSX + CSV + Markdown

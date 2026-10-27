@@ -133,7 +133,7 @@ fig, ax = plt.subplots(figsize=(6.5, 4.0), dpi=150)
 kolor = ["#2f6fdb", "#1f9e5a", "#d1562b"]
 kreski = ax.bar(czasy["metoda"], czasy["czas_s"], color=kolor, width=0.55)
 ax.bar_label(kreski, fmt="%.3f s", padding=3, fontsize=9)
-ax.set_title("Czas wykonania analizy (Q1-Q11)")
+ax.set_title("Czas wykonania analizy (Q1-Q12)")
 ax.set_ylabel("sekundy")
 ax.set_ylim(0, float(czasy["czas_s"].max()) * 1.25)
 ax.grid(axis="y", linestyle=":", alpha=0.5)
@@ -189,7 +189,7 @@ for row in czasy.itertuples(index=False):
 
 wiersze_md += [
     "",
-    "## 2. Zgodnosc wynikow (Q1-Q11)",
+    "## 2. Zgodnosc wynikow (Q1-Q12)",
     "",
     "| Pytanie | Wierszy | Roznych |",
     "|---|---|---|",
@@ -206,7 +206,7 @@ wiersze_md += [
 ]
 przyklady = porownanie[
     porownanie["id"].isin(["Q1", "Q2", "Q6", "Q7", "Q8", "Q10"])
-    | (porownanie["id"].isin(["Q4", "Q9", "Q11"]) & (porownanie["szczegol"] != "-"))
+    | (porownanie["id"].isin(["Q4", "Q9", "Q11", "Q12"]) & (porownanie["szczegol"] != "-"))
 ].sort_values(["id", "szczegol"])
 for row in przyklady.itertuples(index=False):
     szczegol = str(row.szczegol)
